@@ -1,12 +1,12 @@
 name: 'Reusable Terraform Workflow'
 
 on:
-  push:
-    branches:
-      - master
-  pull_request:
-    branches:
-      - master
+  workflow_call:
+    inputs:
+      auto_approve:
+        type: boolean
+        description: 'Whether to auto-approve the apply step'
+        default: false
 
 env:
   ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
