@@ -4,8 +4,9 @@ on:
   workflow_call:
     inputs:
       auto_approve:
+        type: boolean
         description: 'Whether to auto-approve the apply step'
-        required: false
+       # required: false
         default: false
 
 env:
