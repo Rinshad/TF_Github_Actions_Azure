@@ -23,7 +23,7 @@ variable "address_space" {
   type        = list(string)
 }
 
-variable "vnet_location" {
+variable "location" {
   description = "The location/region where the VNet will be created"
   type        = string
 }
