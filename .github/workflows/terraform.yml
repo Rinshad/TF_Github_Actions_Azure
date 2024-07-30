@@ -1,50 +1,42 @@
-name: 'Reusable Terraform Workflow'
-
-on:
-  workflow_call:
-    inputs:
-      auto_approve:
-        type: boolean
-        description: 'Whether to auto-approve the apply step'
-        default: false
-
-env:
-  ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
-  ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
-  ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
-  ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
-
 jobs:
   terraform-plan:
-    name: 'Terraform Plan' 
+    name: 'Terraform Plan'
     runs-on: ubuntu-latest
     env:
-        #this is needed since we are running terraform with read-only permissions
-        ARM_SKIP_PROVIDER_REGISTRATION: true
+      ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+      ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+      ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+      ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+      ARM_SKIP_PROVIDER_REGISTRATION: true
   
     steps:
-      # Checkout the repository to the GitHub Actions runner
-    - name: Checkout
-      uses: actions/checkout@v4
-  
-      # Install the latest version of Terraform CLI 
-    - name: Setup Terraform
-      uses: hashicorp/setup-terraform@v3
-      with:
-        terraform_wrapper: false
-  
-      # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
-    - name: Terraform Init
-      run: terraform init
+      - name: Checkout
+        uses: actions/checkout@v4
 
-    - name: Terraform Format
-      run: terraform fmt -check
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_wrapper: false
 
-    - name: Terraform Plan
-      run: terraform plan -input=false -out=tfplan
+      - name: Azure CLI Login
+        run: |
+          az login --service-principal -u $ARM_CLIENT_ID -p $ARM_CLIENT_SECRET --tenant $ARM_TENANT_ID
+          az account set --subscription $ARM_SUBSCRIPTION_ID
 
-    - name: Upload Terraform Plan
-      uses: actions/upload-artifact@v3
-      with:
-        name: tfplan
-        path: tfplan
+      - name: Verify Azure Account
+        run: az account show
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Format
+        run: terraform fmt -check
+
+      - name: Terraform Plan
+        run: terraform plan -input=false -out=tfplan
+
+      - name: Upload Terraform Plan
+        uses: actions/upload-artifact@v3
+        with:
+          name: tfplan
+          path: tfplan
