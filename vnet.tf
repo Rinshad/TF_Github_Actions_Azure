@@ -8,6 +8,6 @@ module "vnet" {
   # Define the VNet name and address space
   vnet_name           = var.vnet_name
   address_space       = var.address_space
-  location            = var.location
+  vnet_location            = var.location
   tags                = var.tags
 }
