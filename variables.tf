@@ -9,7 +9,3 @@ variable "container_name" {
   description = "The name of the Blob Storage container."
   default     = "my-terraform-state-container"
 }
-variable "prefix" {
-  description = "The key for the state file in the Azure Storage account"
-  type        = string
-}
