@@ -19,7 +19,19 @@ default_security_group_security_rules = [
     protocol                       = "Tcp"
     source_port_range              = "*"
     destination_port_range         = "22"
-    source_address_prefixes        = ["*"]
+    source_address_prefixes        = ["0.0.0.0/0"]
+    destination_address_prefixes   = ["0.0.0.0/0"]
+  },
+  {
+    name                           = "nsg-sonarqube-001"
+    description                    = "http application"
+    priority                       = 1002
+    direction                      = "Inbound"
+    access                         = "Allow"
+    protocol                       = "Tcp"
+    source_port_range              = "*"
+    destination_port_range         = "9000"
+    source_address_prefixes        = ["0.0.0.0/0"]
     destination_address_prefixes   = ["0.0.0.0/0"]
   }
 ]

@@ -17,6 +17,7 @@ resource "azurerm_virtual_machine" "vm" {
   resource_group_name   = module.vnet.rg_name
   network_interface_ids = [azurerm_network_interface.vm_nic.id]
   vm_size               = var.vm_size
+  delete_os_disk_on_termination = true
 
   storage_os_disk {
     name              = "${var.vm_name}-osdisk"
@@ -62,8 +63,11 @@ SETTINGS
   }
 }
 resource "azurerm_public_ip" "example" {
-  name                = "acceptanceTestPublicIp1"
+  name                = "dev-vm-ip"
   resource_group_name = var.rg_name
   location            = var.location
+  sku                 = "Standard"
   allocation_method   = "Dynamic"
+  ddos_protection_mode = "Disabled"
+
 }
