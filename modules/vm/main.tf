@@ -1,20 +1,32 @@
+# Network Interface
 resource "azurerm_network_interface" "vm_nic" {
   name                = "${var.vm_name}-nic"
-  location            = module.vnet.location
-  resource_group_name = module.vnet.rg_name
+  location            = var.location
+  resource_group_name = var.rg_name
 
   ip_configuration {
     name                          = "${var.vm_name}-ipcfg"
-    subnet_id                     = module.subnet.subnet_id
+    subnet_id                     = var.subnet_id
     private_ip_address_allocation = "Dynamic"
     public_ip_address_id          = azurerm_public_ip.example.id
   }
 }
 
+# Public IP
+resource "azurerm_public_ip" "example" {
+  name                = "${var.vm_name}-ip"
+  resource_group_name = var.rg_name
+  location            = var.location
+  sku                 = "Standard"
+  allocation_method   = "Static"
+  ddos_protection_mode = "Disabled"
+}
+
+# Virtual Machine
 resource "azurerm_virtual_machine" "vm" {
   name                  = var.vm_name
-  location              = module.vnet.location
-  resource_group_name   = module.vnet.rg_name
+  location              = var.location
+  resource_group_name   = var.rg_name
   network_interface_ids = [azurerm_network_interface.vm_nic.id]
   vm_size               = var.vm_size
   delete_os_disk_on_termination = true
@@ -43,6 +55,8 @@ resource "azurerm_virtual_machine" "vm" {
     disable_password_authentication = false
   }
 }
+
+# VM Extension for custom script
 resource "azurerm_virtual_machine_extension" "vm" {
   name                 = "hostname"
   virtual_machine_id   = azurerm_virtual_machine.vm.id
@@ -56,18 +70,4 @@ resource "azurerm_virtual_machine_extension" "vm" {
   "commandToExecute": "/bin/bash package_installation.sh"
  }
 SETTINGS
-
-
-  tags = {
-    environment = "dev"
-  }
-}
-resource "azurerm_public_ip" "example" {
-  name                = "dev-vm-ip"
-  resource_group_name = var.rg_name
-  location            = var.location
-  sku                 = "Standard"
-  allocation_method   = "Dynamic"
-  ddos_protection_mode = "Disabled"
-
 }

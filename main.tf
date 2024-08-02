@@ -18,3 +18,15 @@ module "subnet" {
 
   depends_on = [module.vnet]
 }
+module "vm" {
+  source              = "./modules/vm"
+  vm_name             = var.vm_name
+  location            = var.location
+  rg_name             = var.rg_name
+  subnet_id           = module.subnet.subnet_id
+  vm_size             = var.vm_size
+  admin_username      = var.admin_username
+  admin_password      = var.admin_password
+
+  depends_on = [module.vnet]
+}
