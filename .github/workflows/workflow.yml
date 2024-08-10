@@ -4,6 +4,11 @@ on:
   pull_request:
     branches:
       - master
+    paths:
+      - '**/*.tf'
+      - '**/*.tfvars'
+      - '**/*.hcl'
+      - '**/*.tfstate'
   push:
     branches:
       - master
@@ -21,13 +26,7 @@ jobs:
   terraform-plan:
     name: 'Terraform Plan' 
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.default_branch == 'master' && 
-        (
-          contains(github.event.head_commit.message, '.tf') ||
-          contains(github.event.head_commit.message, '.tfvars') ||
-          contains(github.event.head_commit.message, '.tfstate') ||
-          contains(github.event.head_commit.message, '.hcl')
-        )
+    if: github.event_name == 'pull_request'
     env:
       # This is needed since we are running Terraform with read-only permissions
       ARM_SKIP_PROVIDER_REGISTRATION: true
