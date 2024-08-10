@@ -1,12 +1,12 @@
-name: 'Terraform GitHub Workflow for Azure'
+name: 'Terraform GitHub Workflow'
 
 on:
   pull_request:
     branches:
       - master
-  issue_comment:
-    types:
-      - created
+  push:
+    branches:
+      - master
 
 env: 
   ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
@@ -16,63 +16,65 @@ env:
 
 permissions:
   contents: read
-  issues: write
 
 jobs:
   terraform-plan:
-    if: github.event_name == 'pull_request'
     name: 'Terraform Plan' 
     runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.default_branch == 'master' && 
+        (
+          contains(github.event.head_commit.message, '.tf') ||
+          contains(github.event.head_commit.message, '.tfvars') ||
+          contains(github.event.head_commit.message, '.tfstate') ||
+          contains(github.event.head_commit.message, '.hcl')
+        )
     env:
-      # This is needed since we are running terraform with read-only permissions
+      # This is needed since we are running Terraform with read-only permissions
       ARM_SKIP_PROVIDER_REGISTRATION: true
 
     steps:
+      # Checkout the repository to the GitHub Actions runner
       - name: Checkout
         uses: actions/checkout@v4
 
+      # Install the latest version of Terraform CLI 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_wrapper: false
 
+      # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
       - name: Terraform Init
         run: terraform init
 
+      # Generates an execution plan for Terraform
       - name: Terraform Plan
-        id: plan
-        run: terraform plan -var-file="dev.tfvars" -out=tfplan
-
-      - name: Save Plan as Artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: tfplan
-          path: tfplan
+        run: terraform plan -var-file="dev.tfvars" -input=false
 
   terraform-apply:
-    if: github.event_name == 'issue_comment' && github.event.issue.pull_request.merged == true && contains(github.event.comment.body, 'apply')
-    name: 'Terraform Apply'
+    name: 'Terraform Apply' 
     runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master' && github.event_name == 'push'
     env:
+      # This is needed since we are running Terraform with read-only permissions
       ARM_SKIP_PROVIDER_REGISTRATION: true
 
     steps:
+      # Checkout the repository to the GitHub Actions runner
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Download Plan
-        uses: actions/download-artifact@v3
-        with:
-          name: tfplan
-
+      # Install the latest version of Terraform CLI 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_wrapper: false
 
+      # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
       - name: Terraform Init
         run: terraform init
 
+      # Apply the changes required to reach the desired state of the configuration
       - name: Terraform Apply
-        run: terraform apply -auto-approve tfplan
+        run: terraform apply -var-file="dev.tfvars" -auto-approve -input=false
 

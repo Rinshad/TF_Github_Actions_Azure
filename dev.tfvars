@@ -7,7 +7,7 @@ address_prefixes    = ["10.0.1.0/24"]
 default_security_group_name = "default_sg_001"
 vm_name                  = "dev-vm"
 vm_size                  = "Standard_B2s"
-admin_username           = "adminuser"
+admin_username           = "azureuser"
 admin_password           = "P@ssword1234"
 default_security_group_security_rules = [
   {
