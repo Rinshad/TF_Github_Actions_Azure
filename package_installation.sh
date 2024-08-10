@@ -28,7 +28,7 @@ sudo apt-get update
 sudo apt-get install trivy -y
 
 #Sonarqube docker container installation
-docker run -d \
+sudo docker run -d \
     -p 9000:9000 \
     -v sonarqube_extensions:/opt/sonarqube/extensions \
     sonarqube:community
