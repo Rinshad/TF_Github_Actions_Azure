@@ -1,4 +1,4 @@
-name: 'Terraform GitHub Workflow'
+name: 'Terraform GitHub Workflow for Azure'
 
 on:
   pull_request:
